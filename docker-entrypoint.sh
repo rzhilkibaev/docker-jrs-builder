@@ -6,7 +6,7 @@ configure_buildomatic() {
 cat >/opt/jrs/ce/buildomatic/default_master.properties <<EOL
 appServerType = skipAppServerCheck
 dbType=postgresql
-dbHost=localhost
+dbHost=db
 dbUsername=postgres
 dbPassword=postgres
 maven = $M2_HOME/bin/mvn
