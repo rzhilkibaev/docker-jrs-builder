@@ -12,7 +12,7 @@ CTX_FILE="$1"
 CE_BRANCH="$2"
 PRO_BRANCH="$3"
 
-JST_IMAGE_NAME=jst-test-del-me
+JST_IMAGE_NAME=rzhilibaev/jst
 
 echo "Context file: $CTX_FILE"
 echo "ce branch: $CE_BRANCH"
