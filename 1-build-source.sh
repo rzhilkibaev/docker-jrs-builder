@@ -23,16 +23,25 @@ echo "JST_IMAGE_NAME=$JST_IMAGE_NAME" > $CTX_FILE
 # create data container for build data
 # we don't do jst init here because the output of it is not visible (because of $(...))
 echo "Creating build data container..."
-#BUILD_DATA_CONTAINER=5d4e9073e3ac01c25a5e063f04aaec57599f41127bd078cb60a361e4fbb05f41
 BUILD_DATA_CONTAINER=$(docker run -v /opt/jrs -v /root/.m2 -d $JST_IMAGE_NAME --help)
 sleep 5s
 echo "Created build data container: $BUILD_DATA_CONTAINER"
 echo "BUILD_DATA_CONTAINER=$BUILD_DATA_CONTAINER" >> $CTX_FILE
 
+HOSTIP=`ip -4 addr show scope global dev docker0 | grep inet | awk '{print \$2}' | cut -d / -f 1`
+
 # jst init
 echo "Running jst init..."
-docker run --rm --volumes-from $BUILD_DATA_CONTAINER --net=host $JST_IMAGE_NAME init anonymous $CE_BRANCH $PRO_BRANCH
+docker run --rm \
+    --volumes-from $BUILD_DATA_CONTAINER \
+    --add-host=svnserver.jaspersoft.com:${HOSTIP} \
+    --add-host=mvnrepo.jaspersoft.com:${HOSTIP} \
+    $JST_IMAGE_NAME init anonymous $CE_BRANCH $PRO_BRANCH
 
 # jst build
 echo "Running jst build..."
-docker run --rm --volumes-from $BUILD_DATA_CONTAINER --net=host $JST_IMAGE_NAME build
+docker run --rm \
+    --volumes-from $BUILD_DATA_CONTAINER \
+    --add-host=svnserver.jaspersoft.com:${HOSTIP} \
+    --add-host=mvnrepo.jaspersoft.com:${HOSTIP} \
+    $JST_IMAGE_NAME build
