@@ -4,6 +4,9 @@
 # this script requires following arguments:
 # 1. CTX_FILE - a shell script which is going to be used to pass data between other scripts in the group.
 
+set -e
+set -o pipefail
+
 CTX_FILE="$1"
 
 POSTGRES_IMAGE_NAME=postgres:9.4
