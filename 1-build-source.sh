@@ -31,8 +31,8 @@ echo "BUILD_DATA_CONTAINER=$BUILD_DATA_CONTAINER" >> $CTX_FILE
 
 # jst init
 echo "Running jst init..."
-docker run --rm --volumes-from $BUILD_DATA_CONTAINER $JST_IMAGE_NAME init anonymous $CE_BRANCH $PRO_BRANCH
+docker run --rm --volumes-from $BUILD_DATA_CONTAINER --net=host $JST_IMAGE_NAME init anonymous $CE_BRANCH $PRO_BRANCH
 
 # jst build
 echo "Running jst build..."
-docker run --rm --volumes-from $BUILD_DATA_CONTAINER $JST_IMAGE_NAME build
+docker run --rm --volumes-from $BUILD_DATA_CONTAINER --net=host $JST_IMAGE_NAME build
