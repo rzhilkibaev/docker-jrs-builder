@@ -26,7 +26,12 @@ sleep 30s
 
 # create repo (postgres)
 echo "Creating jrs repo (postgres)..."
-docker run --rm --volumes-from $BUILD_DATA_CONTAINER --link $PG_DATA_CONTAINER:db $JST_IMAGE_NAME init-db
+HOSTIP=`ip -4 addr show scope global dev docker0 | grep inet | awk '{print \$2}' | cut -d / -f 1`
+docker run --rm \
+    --volumes-from $BUILD_DATA_CONTAINER \
+    --add-host=svnserver.jaspersoft.com:${HOSTIP} \
+    --add-host=mvnrepo.jaspersoft.com:${HOSTIP} \
+    --link $PG_DATA_CONTAINER:db $JST_IMAGE_NAME init-db
 echo "Created jrs repo (postgres)"
 
 echo "Stopping postgres data container..."
