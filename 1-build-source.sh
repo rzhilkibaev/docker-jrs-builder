@@ -36,7 +36,7 @@ docker run --rm \
     --volumes-from $BUILD_DATA_CONTAINER \
     --add-host=svnserver.jaspersoft.com:${HOSTIP} \
     --add-host=mvnrepo.jaspersoft.com:${HOSTIP} \
-    $JST_IMAGE_NAME init anonymous $CE_BRANCH $PRO_BRANCH
+    $JST_IMAGE_NAME init $CE_BRANCH $PRO_BRANCH
 
 # jst build
 echo "Running jst build..."
