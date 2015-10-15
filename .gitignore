@@ -6,5 +6,5 @@ build-*.log
 build-state-*.sh
 
 # test script
-docker-jrs-build-test.sh
+docker-jrs-builder-test.sh
 
