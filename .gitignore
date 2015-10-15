@@ -8,3 +8,6 @@ build-state-*.sh
 # test script
 docker-jrs-builder-test.sh
 
+# configuration
+configuration.sh
+

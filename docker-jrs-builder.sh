@@ -6,10 +6,10 @@
 #
 #     BUILD_ID     Build id, can be Jenkins $BUILD_ID or something similar used to tell one build from the other
 #     COMMAND      One of the following commands with arguments:
-#        init BRANCH_CE BRANCH_PRO   (Create a build data container and run jst init BRANCH_CE BRANCH_PRO)
-#        build                       (Run jst build)
-#        create-postgres-image       (Create postgres database image with all data in it)
-#        clean                       (Delete temporary files and containers)
+#        init BRANCH_CE BRANCH_PRO             (Create a build data container and run jst init BRANCH_CE BRANCH_PRO)
+#        build                                 (Run jst build)
+#        create-postgres-image IMAGE_NAME      (Create postgres database image with all data in it)
+#        clean                                 (Delete temporary files and containers)
 #
 # When this script runs it looks for configuration.sh file in the current directory.
 # This file must define the following variables:
@@ -18,6 +18,8 @@
 # When executing commands this script creates build-state-${BUILD_ID}.sh in the current directory
 # with variable definitions for all intermediate docker containers. This build state file is used to pass
 # temporary container names and other information between different executions of this script for the same build (same BUILD_ID).
+#
+# To run postgres image: docker run -d -p 5432:5432 -e PGDATA=/var/lib/postgresql/jrs-data <image_name> postgres
 
 set -e
 set -o pipefail
