@@ -1,0 +1,10 @@
+# vim
+*.swp
+
+# build products
+build-*.log
+build-state-*.sh
+
+# test script
+docker-jrs-build-test.sh
+
