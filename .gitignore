@@ -2,7 +2,7 @@
 *.swp
 
 # build products
-build-*.log
+*.log
 build-state-*.sh
 
 # test script
