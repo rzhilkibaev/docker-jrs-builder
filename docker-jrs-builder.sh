@@ -20,6 +20,7 @@
 # temporary container names and other information between different executions of this script for the same build (same BUILD_ID).
 #
 # To run postgres image: docker run -d -p 5432:5432 -e PGDATA=/var/lib/postgresql/jrs-data <image_name> postgres
+# END_DOC
 
 set -e
 set -o pipefail
@@ -133,6 +134,10 @@ run_docker() {
         "$@"
 }
 
+print_usage() {
+    sed -e '/END_DOC/,$d' $(basename $0)| tail --lines=+3
+}
+
 log() {
     echo "[$(basename $0)] $@"
 }
@@ -159,7 +164,7 @@ case "$COMMAND" in
         clean
         ;;
     *)
-        log "Unknown command: $COMMAND"
+        print_usage
         exit 1
 esac
 
