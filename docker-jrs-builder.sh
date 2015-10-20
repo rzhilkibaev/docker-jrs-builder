@@ -79,7 +79,7 @@ jst_build() {
 # Starts up postgres
 start_postgres() {
     log "Starting up postgres..."
-    PG_DATA_CONTAINER=$(docker run --volumes-from $BUILD_DATA_CONTAINER -d $POSTGRES_IMAGE_NAME)
+    PG_DATA_CONTAINER=$(docker run --volumes-from $BUILD_DATA_CONTAINER -d -e PGDATA=/var/lib/postgres/jrs-data $POSTGRES_IMAGE_NAME)
     log "Created postgres data container: $PG_DATA_CONTAINER"
     echo "PG_DATA_CONTAINER=$PG_DATA_CONTAINER" >> $BUILD_STATE_FILE
     log "Waiting for postgres to start up"
@@ -103,20 +103,14 @@ create_postgres_image() {
     start_postgres
     jst_init_db
     stop_postgres
-    log "Copying jrs repo data from volume into container"
-    PG_REPO_DATA_CONTAINER=$(docker run --volumes-from $PG_DATA_CONTAINER -d $POSTGRES_IMAGE_NAME /bin/bash -c "/bin/cp -r /var/lib/postgresql/data /var/lib/postgresql/jrs-data && chown postgres:postgres -R /var/lib/postgresql/jrs-data")
-    echo "PG_REPO_DATA_CONTAINER=$PG_REPO_DATA_CONTAINER" >> $BUILD_STATE_FILE
-    log "Created container for jrs repo (postgres): $PG_REPO_DATA_CONTAINER"
-    # wait for copy process to finish
-    docker attach $PG_REPO_DATA_CONTAINER
 
     log "Commiting container for jrs repo (postgres) into image: $POSTGRES_REPO_IMAGE_NAME"
-    docker commit $PG_REPO_DATA_CONTAINER $POSTGRES_REPO_IMAGE_NAME
+    docker commit \
+        --change="ENV PGDATA /var/lib/postgres/jrs-data" \
+        --change='CMD ["postgres"]' \
+        $PG_DATA_CONTAINER $POSTGRES_REPO_IMAGE_NAME
 
-    log "Deleting container for jrs repo (postgres): $PG_REPO_DATA_CONTAINER"
-    docker rm -v $PG_REPO_DATA_CONTAINER
-
-    log "Deleting db container (postgres): $PG_DATA_CONTAINER"
+    log "Deleting container for jrs repo (postgres): $PG_DATA_CONTAINER"
     docker rm -v $PG_DATA_CONTAINER
 }
 
