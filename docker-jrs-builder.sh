@@ -31,7 +31,8 @@ COMMAND=$2
 BUILD_STATE_FILE=build-state-${BUILD_ID}.sh
 CONFIG_FILE=configuration.sh
 JST_IMAGE_NAME=rzhilkibaev/jst
-POSTGRES_IMAGE_NAME=postgres:9.4
+PG_BASE_IMAGE_NAME=postgres:9.4
+ORA_BASE_IMAGE_NAME=wnameless/oracle-xe-11g
 
 # Loads configuration by sourcing configuration.sh
 load_configuration() {
@@ -78,14 +79,29 @@ jst_build() {
 
 # Starts up postgres
 start_postgres() {
-    log "Starting up postgres..."
-    DB_DATA_CONTAINER=$(docker run --volumes-from $BUILD_DATA_CONTAINER -d -e PGDATA=/var/lib/postgres/jrs-data $POSTGRES_IMAGE_NAME)
-    log "Created postgres data container: $DB_DATA_CONTAINER"
-    log "Waiting for postgres to start up"
+    log "Starting up Postgres..."
+    DB_DATA_CONTAINER=$(docker run --volumes-from $BUILD_DATA_CONTAINER -d -e PGDATA=/var/lib/postgres/jrs-data $PG_BASE_IMAGE_NAME)
+    log "Created Postgres data container: $DB_DATA_CONTAINER"
+    log "Waiting for Postgres to start up"
     sleep 30s
 }
 
-# Creates JRS repo and sampe databases
+start_oracle() {
+    log "Starting up Oracle..."
+    DB_DATA_CONTAINER=$(docker run --volumes-from $BUILD_DATA_CONTAINER -d $ORA_BASE_IMAGE_NAME)
+    log "Created Oracle data container: $DB_DATA_CONTAINER"
+    log "Waiting for Oracle to start up"
+    sleep 30s
+}
+
+# Configures buildomatic
+jst_configure() {
+    DB_TYPE="$1"
+    log "Running jst configure"
+    run_docker $JST_IMAGE_NAME configure --db=$DB_TYPE
+}
+
+# Creates JRS repo and sample databases
 jst_init_db() {
     log "Running jst init-db..."
     run_docker --link $DB_DATA_CONTAINER:db $JST_IMAGE_NAME init-db
@@ -99,6 +115,7 @@ stop_db() {
 
 create_postgres_image() {
     local OUTPUT_IMAGE_NAME="$1"
+    jst_configure pg
     start_postgres
     jst_init_db
     stop_db
@@ -110,6 +127,22 @@ create_postgres_image() {
         $DB_DATA_CONTAINER $OUTPUT_IMAGE_NAME
 
     log "Deleting Postgres container: $DB_DATA_CONTAINER"
+    docker rm -v $DB_DATA_CONTAINER
+}
+
+create_oracle_image() {
+    local OUTPUT_IMAGE_NAME="$1"
+    jst_configure ora
+    start_oracle
+    jst_init_db
+    stop_db
+
+    log "Commiting Oracle container into image: $OUTPUT_IMAGE_NAME"
+    docker commit \
+        --change='CMD "/usr/sbin/startup.sh && /usr/sbin/sshd -D"' \
+        $DB_DATA_CONTAINER $OUTPUT_IMAGE_NAME
+
+    log "Deleting Oracle container: $DB_DATA_CONTAINER"
     docker rm -v $DB_DATA_CONTAINER
 }
 
@@ -151,6 +184,10 @@ case "$COMMAND" in
     create-postgres-image)
         load_build_state
         create_postgres_image $3
+        ;;
+    create-oracle-image)
+        load_build_state
+        create_oracle_image $3
         ;;
     clean)
         load_build_state
