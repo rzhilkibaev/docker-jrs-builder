@@ -19,7 +19,7 @@
 # with variable definitions for all intermediate docker containers. This build state file is used to pass
 # temporary container names and other information between different executions of this script for the same build (same BUILD_ID).
 #
-# To run postgres image: docker run -d -p 5432:5432 -e PGDATA=/var/lib/postgresql/jrs-data <image_name> postgres
+# To run postgres image: docker run -d -p 5432:5432 <image_name>
 # END_DOC
 
 set -e
@@ -79,9 +79,8 @@ jst_build() {
 # Starts up postgres
 start_postgres() {
     log "Starting up postgres..."
-    PG_DATA_CONTAINER=$(docker run --volumes-from $BUILD_DATA_CONTAINER -d -e PGDATA=/var/lib/postgres/jrs-data $POSTGRES_IMAGE_NAME)
-    log "Created postgres data container: $PG_DATA_CONTAINER"
-    echo "PG_DATA_CONTAINER=$PG_DATA_CONTAINER" >> $BUILD_STATE_FILE
+    DB_DATA_CONTAINER=$(docker run --volumes-from $BUILD_DATA_CONTAINER -d -e PGDATA=/var/lib/postgres/jrs-data $POSTGRES_IMAGE_NAME)
+    log "Created postgres data container: $DB_DATA_CONTAINER"
     log "Waiting for postgres to start up"
     sleep 30s
 }
@@ -89,29 +88,29 @@ start_postgres() {
 # Creates JRS repo and sampe databases
 jst_init_db() {
     log "Running jst init-db..."
-    run_docker --link $PG_DATA_CONTAINER:db $JST_IMAGE_NAME init-db
+    run_docker --link $DB_DATA_CONTAINER:db $JST_IMAGE_NAME init-db
     log "Initialized db"
 }
 
-stop_postgres() {
-    log "Stopping postgres data container..."
-    docker stop $PG_DATA_CONTAINER
+stop_db() {
+    log "Stopping db data container..."
+    docker stop $DB_DATA_CONTAINER
 }
 
 create_postgres_image() {
-    POSTGRES_REPO_IMAGE_NAME="$1"
+    local OUTPUT_IMAGE_NAME="$1"
     start_postgres
     jst_init_db
-    stop_postgres
+    stop_db
 
-    log "Commiting container for jrs repo (postgres) into image: $POSTGRES_REPO_IMAGE_NAME"
+    log "Commiting Postgres container into image: $OUTPUT_IMAGE_NAME"
     docker commit \
         --change="ENV PGDATA /var/lib/postgres/jrs-data" \
         --change='CMD ["postgres"]' \
-        $PG_DATA_CONTAINER $POSTGRES_REPO_IMAGE_NAME
+        $DB_DATA_CONTAINER $OUTPUT_IMAGE_NAME
 
-    log "Deleting container for jrs repo (postgres): $PG_DATA_CONTAINER"
-    docker rm -v $PG_DATA_CONTAINER
+    log "Deleting Postgres container: $DB_DATA_CONTAINER"
+    docker rm -v $DB_DATA_CONTAINER
 }
 
 clean() {
@@ -136,7 +135,7 @@ log() {
     echo "[$(basename $0)] $@"
 }
 
-log "$(basename $0) started with following arguments: $@"
+log "Started with following arguments: $@"
 
 load_configuration
 
