@@ -12,3 +12,4 @@ docker-jrs-builder-test.sh
 # configuration
 configuration.sh
 
+/.project

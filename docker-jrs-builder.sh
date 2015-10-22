@@ -113,7 +113,6 @@ stop_db() {
 }
 
 create_postgres_image() {
-    local OUTPUT_IMAGE_NAME="$1"
     jst_configure pg
     start_postgres
     jst_init_db
@@ -130,7 +129,6 @@ create_postgres_image() {
 }
 
 create_oracle_image() {
-    local OUTPUT_IMAGE_NAME="$1"
     jst_configure ora
     start_oracle
     jst_init_db
@@ -182,13 +180,15 @@ case "$COMMAND" in
         ;;
     create-postgres-image)
         DB_TYPE=pg
+        OUTPUT_IMAGE_NAME="$3"
         load_build_state
         create_postgres_image $3
         ;;
     create-oracle-image)
         DB_TYPE=ora
+        OUTPUT_IMAGE_NAME="$3"
         load_build_state
-        create_oracle_image $3
+        create_oracle_image
         ;;
     clean)
         load_build_state
