@@ -33,6 +33,7 @@ CONFIG_FILE=configuration.sh
 JST_IMAGE_NAME=rzhilkibaev/jst
 PG_BASE_IMAGE_NAME=postgres:9.4
 ORA_BASE_IMAGE_NAME=wnameless/oracle-xe-11g
+MYSQL_BASE_IMAGE_NAME=rzhilkibaev/jrs-mysql
 
 # Loads configuration by sourcing configuration.sh
 load_configuration() {
@@ -78,7 +79,7 @@ jst_build() {
 }
 
 # Starts up postgres
-start_postgres() {
+start_pg() {
     log "Starting up Postgres..."
     DB_DATA_CONTAINER=$(docker run --volumes-from $BUILD_DATA_CONTAINER -d -e PGDATA=/var/lib/postgres/jrs-data $PG_BASE_IMAGE_NAME)
     log "Created Postgres data container: $DB_DATA_CONTAINER"
@@ -86,7 +87,7 @@ start_postgres() {
     sleep 30s
 }
 
-start_oracle() {
+start_ora() {
     log "Starting up Oracle..."
     DB_DATA_CONTAINER=$(docker run --volumes-from $BUILD_DATA_CONTAINER -d $ORA_BASE_IMAGE_NAME)
     log "Created Oracle data container: $DB_DATA_CONTAINER"
@@ -114,7 +115,7 @@ stop_db() {
 
 create_pg_image() {
     jst_configure
-    start_postgres
+    start_pg
     jst_init_db
     stop_db
 
@@ -130,7 +131,7 @@ create_pg_image() {
 
 create_ora_image() {
     jst_configure
-    start_oracle
+    start_ora
     jst_init_db
     stop_db
 
@@ -141,6 +142,29 @@ create_ora_image() {
 
     log "Deleting Oracle container: $DB_DATA_CONTAINER"
     docker rm -v $DB_DATA_CONTAINER
+}
+
+create_mysql_image() {
+    jst_configure
+    start_mysql
+    jst_init_db
+    stop_db
+
+    log "Commiting MySQL container into image: $OUTPUT_IMAGE_NAME"
+    docker commit \
+        --change='CMD ["mysqld"]' \
+        $DB_DATA_CONTAINER $OUTPUT_IMAGE_NAME
+
+    log "Deleting MySQL container: $DB_DATA_CONTAINER"
+    docker rm -v $DB_DATA_CONTAINER
+}
+
+start_mysql() {
+    log "Starting up MySQL..."
+    DB_DATA_CONTAINER=$(docker run --volumes-from $BUILD_DATA_CONTAINER -d $MYSQL_BASE_IMAGE_NAME)
+    log "Created MySQL data container: $DB_DATA_CONTAINER"
+    log "Waiting for MySQL to start up"
+    sleep 30s
 }
 
 clean() {
