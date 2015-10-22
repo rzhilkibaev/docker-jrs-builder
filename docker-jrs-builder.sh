@@ -96,8 +96,7 @@ start_oracle() {
 
 # Configures buildomatic
 jst_configure() {
-    DB_TYPE="$1"
-    log "Running jst configure"
+    log "Running jst configure for db type $DB_TYPE"
     run_docker $JST_IMAGE_NAME configure --db=$DB_TYPE
 }
 
@@ -182,10 +181,12 @@ case "$COMMAND" in
         jst_build
         ;;
     create-postgres-image)
+        DB_TYPE=pg
         load_build_state
         create_postgres_image $3
         ;;
     create-oracle-image)
+        DB_TYPE=ora
         load_build_state
         create_oracle_image $3
         ;;
