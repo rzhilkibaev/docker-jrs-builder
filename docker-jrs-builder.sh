@@ -112,7 +112,7 @@ stop_db() {
     docker stop $DB_DATA_CONTAINER
 }
 
-create_postgres_image() {
+create_pg_image() {
     jst_configure pg
     start_postgres
     jst_init_db
@@ -128,7 +128,7 @@ create_postgres_image() {
     docker rm -v $DB_DATA_CONTAINER
 }
 
-create_oracle_image() {
+create_ora_image() {
     jst_configure ora
     start_oracle
     jst_init_db
@@ -178,17 +178,11 @@ case "$COMMAND" in
         load_build_state
         jst_build
         ;;
-    create-postgres-image)
-        DB_TYPE=pg
-        OUTPUT_IMAGE_NAME="$3"
+    create-db-image)
+        DB_TYPE=$3
+        OUTPUT_IMAGE_NAME="$4"
         load_build_state
-        create_postgres_image $3
-        ;;
-    create-oracle-image)
-        DB_TYPE=ora
-        OUTPUT_IMAGE_NAME="$3"
-        load_build_state
-        create_oracle_image
+        create_${DB_TYPE}_image
         ;;
     clean)
         load_build_state
