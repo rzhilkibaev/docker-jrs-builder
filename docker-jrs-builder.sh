@@ -113,7 +113,7 @@ stop_db() {
 }
 
 create_pg_image() {
-    jst_configure pg
+    jst_configure
     start_postgres
     jst_init_db
     stop_db
@@ -129,7 +129,7 @@ create_pg_image() {
 }
 
 create_ora_image() {
-    jst_configure ora
+    jst_configure
     start_oracle
     jst_init_db
     stop_db
