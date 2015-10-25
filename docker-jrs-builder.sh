@@ -11,11 +11,11 @@
 #        create-postgres-image IMAGE_NAME      (Create postgres database image with all data in it)
 #        clean                                 (Delete temporary files and containers)
 #
-# When this script runs it looks for configuration.sh file in the current directory.
+# When this script runs it looks for /etc/docker-jrs-builder/configuration.sh file.
 # This file must define the following variables:
 # SVNSERVER_IP    IP address of svnserver.jaspersoft.com
 # MVNREPO_IP      IP address of mvnrepo.jaspersoft.com
-# When executing commands this script creates build-state-${BUILD_ID}.sh in the current directory
+# When executing commands this script creates /var/tmp/build-state-${BUILD_ID}.sh in the current directory
 # with variable definitions for all intermediate docker containers. This build state file is used to pass
 # temporary container names and other information between different executions of this script for the same build (same BUILD_ID).
 #
@@ -28,8 +28,8 @@ set -o pipefail
 BUILD_ID=$1
 COMMAND=$2
 
-BUILD_STATE_FILE=build-state-${BUILD_ID}.sh
-CONFIG_FILE=configuration.sh
+BUILD_STATE_FILE=/var/tmp/build-state-${BUILD_ID}.sh
+CONFIG_FILE=/etc/docker-jrs-builder/configuration.sh
 JST_IMAGE_NAME=rzhilkibaev/jst
 PG_BASE_IMAGE_NAME=postgres:9.4
 ORA_BASE_IMAGE_NAME=wnameless/oracle-xe-11g
