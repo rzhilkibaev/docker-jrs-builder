@@ -98,7 +98,7 @@ start_ora() {
 # Configures buildomatic
 jst_configure() {
     log "Running jst configure for db type $DB_TYPE"
-    run_docker $JST_IMAGE_NAME configure --db=$DB_TYPE
+    run_docker $JST_IMAGE_NAME configure --dbType=$DB_TYPE --dbHost=db --appServerType=skipAppServerCheck
 }
 
 # Creates JRS repo and sample databases
