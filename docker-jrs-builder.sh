@@ -79,7 +79,7 @@ jst_build() {
 }
 
 # Starts up postgres
-start_pg() {
+start_postgresql() {
     log "Starting up Postgres..."
     DB_DATA_CONTAINER=$(docker run --volumes-from $BUILD_DATA_CONTAINER -d -e PGDATA=/var/lib/postgres/jrs-data $PG_BASE_IMAGE_NAME)
     log "Created Postgres data container: $DB_DATA_CONTAINER"
@@ -87,7 +87,7 @@ start_pg() {
     sleep 30s
 }
 
-start_ora() {
+start_oracle() {
     log "Starting up Oracle..."
     DB_DATA_CONTAINER=$(docker run --volumes-from $BUILD_DATA_CONTAINER -d $ORA_BASE_IMAGE_NAME)
     log "Created Oracle data container: $DB_DATA_CONTAINER"
@@ -113,9 +113,9 @@ stop_db() {
     docker stop $DB_DATA_CONTAINER
 }
 
-create_pg_image() {
+create_postgresql_image() {
     jst_configure
-    start_pg
+    start_postgresql
     jst_init_db
     stop_db
 
@@ -129,9 +129,9 @@ create_pg_image() {
     docker rm -v $DB_DATA_CONTAINER
 }
 
-create_ora_image() {
+create_oracle_image() {
     jst_configure
-    start_ora
+    start_oracle
     jst_init_db
     stop_db
 
@@ -200,6 +200,10 @@ case "$COMMAND" in
         ;;
     build)
         load_build_state
+        # by default buildomatic uses tomcat7
+        # we need to reconfigure it before running build
+        DB_TYPE=postgresql
+        jst_configure
         jst_build
         ;;
     create-db-image)
