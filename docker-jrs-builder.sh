@@ -66,7 +66,7 @@ load_build_state() {
 create_build_data_container() {
     log "Creating build data container..."
     # we don't do jst init here because the output of it is not visible (because of $(...))
-    BUILD_DATA_CONTAINER=$(docker run -v /opt/jrs -v /root/.m2 -d --name build-data-$BUILD_ID $JST_IMAGE_NAME --help)
+    BUILD_DATA_CONTAINER=$(docker run -v /opt/jrs -v /home/jst -d --name build-data-$BUILD_ID $JST_IMAGE_NAME --help)
     log "Created build data container: $BUILD_DATA_CONTAINER"
     echo "BUILD_DATA_CONTAINER=$BUILD_DATA_CONTAINER" > $BUILD_STATE_FILE
 }
