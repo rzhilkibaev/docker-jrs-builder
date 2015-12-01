@@ -19,7 +19,14 @@
 # with variable definitions for all intermediate docker containers. This build state file is used to pass
 # temporary container names and other information between different executions of this script for the same build (same BUILD_ID).
 #
-# To run postgres image: docker run -d -p 5432:5432 <image_name>
+# To run PostgreSQL image: docker run -d -p 5432:5432 <image_name>
+# port 5432, username=postgres, password=postgres 
+#
+# To run Oracle image: docker run -d -p 1521:1521 <image_name>
+# port 1521, sid=xe, username=system, password=oracle, username=jasperserver, password=password
+#
+# To run MySQL image: docker run -d -p 3306:3306 <image_name>
+# port 3306, username=root, password=password
 # END_DOC
 
 set -e
@@ -120,9 +127,9 @@ create_postgresql_image() {
     stop_db
 
     log "Commiting Postgres container into image: $OUTPUT_IMAGE_NAME"
+        #--change='CMD ["postgres"]' \
     docker commit \
         --change="ENV PGDATA /var/lib/postgres/jrs-data" \
-        --change='CMD ["postgres"]' \
         $DB_DATA_CONTAINER $OUTPUT_IMAGE_NAME
 
     log "Deleting Postgres container: $DB_DATA_CONTAINER"
@@ -136,8 +143,8 @@ create_oracle_image() {
     stop_db
 
     log "Commiting Oracle container into image: $OUTPUT_IMAGE_NAME"
+        #--change='CMD "/usr/sbin/startup.sh && /usr/sbin/sshd -D"' \
     docker commit \
-        --change='CMD "/usr/sbin/startup.sh && /usr/sbin/sshd -D"' \
         $DB_DATA_CONTAINER $OUTPUT_IMAGE_NAME
 
     log "Deleting Oracle container: $DB_DATA_CONTAINER"
@@ -151,8 +158,8 @@ create_mysql_image() {
     stop_db
 
     log "Commiting MySQL container into image: $OUTPUT_IMAGE_NAME"
+        #--change='CMD ["mysqld"]' \
     docker commit \
-        --change='CMD ["mysqld"]' \
         $DB_DATA_CONTAINER $OUTPUT_IMAGE_NAME
 
     log "Deleting MySQL container: $DB_DATA_CONTAINER"
